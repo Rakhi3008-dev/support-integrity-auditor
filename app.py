@@ -1,19 +1,19 @@
-
 import streamlit as st
 import pandas as pd
 import joblib
 
-# -------------------------------
-# Load Model
-# -------------------------------
+model = joblib.load(
+    "models/xgb_pipeline.pkl"
+)
 
-model = joblib.load("models/xgb_pipeline.pkl")
+tab1, tab2 = st.tabs(
+    ["🎫 Ticket Auditor", "📊 Dashboard"]
+)
 
-# -------------------------------
-# Page Config
-# -------------------------------
+with tab1:
+    pass
 
-st.set_page_config(
+    st.set_page_config(
     page_title="Support Integrity Auditor",
     page_icon="🛡️",
     layout="wide"
@@ -25,19 +25,23 @@ st.set_page_config(
 
 st.sidebar.title("📊 Audit Dashboard")
 
+df = pd.read_csv(
+    "data/pseudo_labeled_tickets.csv"
+)
+
 st.sidebar.metric(
     "Hidden Crisis",
-    "3202"
+    (df["Mismatch_Type"] == "Hidden Crisis").sum()
 )
 
 st.sidebar.metric(
     "False Alarm",
-    "2239"
+    (df["Mismatch_Type"] == "False Alarm").sum()
 )
 
 st.sidebar.metric(
     "Consistent",
-    "14559"
+    (df["Mismatch_Type"] == "Consistent").sum()
 )
 
 st.sidebar.markdown("---")
@@ -328,4 +332,164 @@ consistent with the assigned
 No significant mismatch was detected.
             """
 
+        )
+
+    
+
+with tab2:
+
+    st.header(
+        "📊 Priority Mismatch Dashboard"
+    )
+
+    try:
+
+        df = pd.read_csv(
+            "data/pseudo_labeled_tickets.csv"
+        )
+
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+            st.metric(
+                "Hidden Crisis",
+                int(
+                    (
+                        df["Mismatch_Type"]
+                        ==
+                        "Hidden Crisis"
+                    ).sum()
+                )
+            )
+
+        with col2:
+            st.metric(
+                "False Alarm",
+                int(
+                    (
+                        df["Mismatch_Type"]
+                        ==
+                        "False Alarm"
+                    ).sum()
+                )
+            )
+
+        with col3:
+            st.metric(
+                "Consistent",
+                int(
+                    (
+                        df["Mismatch_Type"]
+                        ==
+                        "Consistent"
+                    ).sum()
+                )
+            )
+
+        st.divider()
+
+        st.subheader(
+            "Mismatch Type Distribution"
+        )
+
+        st.bar_chart(
+            df["Mismatch_Type"]
+            .value_counts()
+        )
+
+        st.subheader(
+            "Flagged vs Consistent Tickets"
+        )
+
+        st.bar_chart(
+            df["Mismatch_Label"]
+            .value_counts()
+        )
+
+        st.subheader(
+            "Top Contributing Signals"
+        )
+
+        signal_df = pd.DataFrame(
+            {
+                "Signal": [
+                    "Semantic Score",
+                    "Keyword Score",
+                    "Resolution Time"
+                ],
+                "Value": [
+                    df["Semantic_Score"].mean(),
+                    df["Keyword_Score"].mean(),
+                    df[
+                        "Resolution_Time_Hours"
+                    ].mean()
+                ]
+            }
+        )
+
+        st.bar_chart(
+            signal_df.set_index(
+                "Signal"
+            )
+        )
+
+        st.subheader(
+            "Severity Delta Heatmap"
+        )
+
+        import seaborn as sns
+        import matplotlib.pyplot as plt
+
+        heatmap_df = pd.pivot_table(
+
+            df,
+
+            values="Severity_Delta",
+
+            index="Issue_Category",
+
+            columns="Ticket_Channel",
+
+            aggfunc="mean"
+
+        )
+
+        fig, ax = plt.subplots(
+            figsize=(8, 4)
+        )
+
+        sns.heatmap(
+
+            heatmap_df,
+
+            annot=True,
+
+            cmap="RdYlGn_r",
+
+            ax=ax
+
+        )
+
+        st.pyplot(fig)
+
+        if uploaded_file:
+
+            st.divider()
+
+            st.subheader(
+                "Uploaded Batch Preview"
+            )
+
+            batch_df = pd.read_csv(
+                uploaded_file
+            )
+
+            st.dataframe(
+                batch_df.head()
+            )
+
+    except Exception as e:
+
+        st.error(
+            f"Dashboard error: {e}"
         )
