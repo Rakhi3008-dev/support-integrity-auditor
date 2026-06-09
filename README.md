@@ -180,6 +180,29 @@ Support-Integrity-Auditor/
 The model is intentionally optimized for high recall to reduce the likelihood of missing genuine Hidden Crisis tickets.
 
 ---
+## Ablation Study
+
+To evaluate the contribution of each severity signal, we trained a Logistic Regression classifier using different combinations of engineered features.
+
+| Configuration         | Accuracy   |
+| --------------------- | ---------- |
+| Semantic Only         | 72.80%     |
+| Keyword Only          | 72.80%     |
+| Resolution Only       | 72.80%     |
+| Semantic + Keyword    | **75.95%** |
+| Semantic + Resolution | 72.90%     |
+| Keyword + Resolution  | 73.08%     |
+| Full Fusion           | 73.33%     |
+
+### Observations
+
+* Semantic and keyword-based signals provide the strongest predictive information.
+* Combining semantic and keyword features improves performance by more than 3 percentage points over any individual signal.
+* Resolution time contributes only marginally to predictive performance in this dataset.
+* Although the full fusion configuration did not outperform the Semantic + Keyword combination, operational signals such as resolution time were retained to preserve interpretability and align with real-world support workflows.
+
+These findings indicate that textual indicators are the primary drivers of priority mismatch detection, while operational metadata serves as a supplementary signal.
+
 
 ## ▶️ Run Locally
 

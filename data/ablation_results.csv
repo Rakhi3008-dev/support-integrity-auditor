@@ -1,0 +1,8 @@
+Configuration,Accuracy
+Semantic Only,0.728
+Keyword Only,0.728
+Resolution Only,0.728
+Semantic + Resolution,0.729
+Keyword + Resolution,0.73075
+Full Fusion,0.73325
+Semantic + Keyword,0.7595
